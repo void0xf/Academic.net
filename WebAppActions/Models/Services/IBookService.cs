@@ -3,18 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebAppActions.Models;
+using WebAppActions.Models.ViewModels;
 
 namespace WebAppActions.Models.Services
 {
     public interface IBookService
     {
-        Task<IEnumerable<Book>> GetAllBooksAsync();
-        Task<Book> GetBookByIdAsync(Guid id);
-        Task<Book> GetBookWithDetailsAsync(Guid id);
+        Task<IEnumerable<BookViewModel>> GetAllBooksAsync();
+        Task<BookFormViewModel> GetBookForEditAsync(Guid id);
+        Task<BookDetailsViewModel> GetBookDetailsAsync(Guid id);
         Task<SelectList> GetCategorySelectListAsync(Guid? selectedId = null);
-        Task<Book> CreateBookAsync(Book book);
-        Task UpdateBookAsync(Book book);
+        Task<BookViewModel> CreateBookAsync(BookFormViewModel bookFormViewModel);
+        Task UpdateBookAsync(BookFormViewModel bookFormViewModel);
         Task DeleteBookAsync(Guid id);
         Task<bool> BookExistsAsync(Guid id);
+        Task<BookFormViewModel> GetBookFormDefaultsAsync();
     }
 } 
