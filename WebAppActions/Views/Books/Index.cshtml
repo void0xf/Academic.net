@@ -1,4 +1,4 @@
-@model IEnumerable<WebAppActions.Models.Book>
+@model IEnumerable<WebAppActions.Models.ViewModels.BookViewModel>
 
 @{
     ViewData["Title"] = "Books";
@@ -13,16 +13,16 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                Title
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Author)
+                Author
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Category)
+                Category
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
+                Created At
             </th>
             <th>Actions</th>
         </tr>
@@ -37,7 +37,7 @@
                 @Html.DisplayFor(modelItem => item.Author)
             </td>
             <td>
-                @(item.Category != null ? Html.DisplayFor(modelItem => item.Category.Name) : "No Category")
+                @(item.CategoryName ?? "No Category")
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CreatedAt)

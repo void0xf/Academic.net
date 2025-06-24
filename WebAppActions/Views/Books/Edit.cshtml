@@ -1,4 +1,4 @@
-@model WebAppActions.Models.Book
+@model WebAppActions.Models.ViewModels.BookFormViewModel
 
 @{
     ViewData["Title"] = "Edit Book";
@@ -11,7 +11,7 @@
 <div class="row">
     <div class="col-md-6">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="All" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="CreatedAt" />
             <div class="form-group mb-3">
@@ -26,7 +26,7 @@
             </div>
             <div class="form-group mb-3">
                 <label asp-for="CategoryId" class="control-label">Category (Optional)</label>
-                <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryList">
+                <select asp-for="CategoryId" class="form-select" asp-items="@Model.CategoryList">
                     <option value="">-- No Category --</option>
                 </select>
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
