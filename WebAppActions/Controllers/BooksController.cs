@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
-using WebAppActions.Models;
 using WebAppActions.Models.Services;
+using WebAppActions.Models.ViewModels;
 
 namespace WebAppActions.Controllers
 {
@@ -18,8 +18,8 @@ namespace WebAppActions.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var books = await _bookService.GetAllBooksAsync();
-            return View(books);
+            var bookViewModels = await _bookService.GetAllBooksAsync();
+            return View(bookViewModels);
         }
 
         public async Task<IActionResult> Details(Guid? id)
@@ -29,38 +29,34 @@ namespace WebAppActions.Controllers
                 return NotFound();
             }
 
-            var book = await _bookService.GetBookWithDetailsAsync(id.Value);
+            var bookViewModel = await _bookService.GetBookDetailsAsync(id.Value);
 
-            if (book == null)
+            if (bookViewModel == null)
             {
                 return NotFound();
             }
 
-            return View(book);
+            return View(bookViewModel);
         }
 
         public async Task<IActionResult> Create()
         {
-            ViewBag.CategoryList = await _bookService.GetCategorySelectListAsync();
-            return View();
+            var viewModel = await _bookService.GetBookFormDefaultsAsync();
+            return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Author,CategoryId")] Book book)
+        public async Task<IActionResult> Create([Bind("Title,Author,CategoryId")] BookFormViewModel bookFormViewModel)
         {
-            ModelState.Remove("Reviews");
-            ModelState.Remove("Category");
-            ModelState.Remove("UserBooks");
-            
             if (ModelState.IsValid)
             {
-                await _bookService.CreateBookAsync(book);
+                await _bookService.CreateBookAsync(bookFormViewModel);
                 return RedirectToAction(nameof(Index));
             }
             
-            ViewBag.CategoryList = await _bookService.GetCategorySelectListAsync(book.CategoryId);
-            return View(book);
+            bookFormViewModel.CategoryList = await _bookService.GetCategorySelectListAsync(bookFormViewModel.CategoryId);
+            return View(bookFormViewModel);
         }
 
         public async Task<IActionResult> Edit(Guid? id)
@@ -70,36 +66,32 @@ namespace WebAppActions.Controllers
                 return NotFound();
             }
 
-            var book = await _bookService.GetBookByIdAsync(id.Value);
-            if (book == null)
+            var bookFormViewModel = await _bookService.GetBookForEditAsync(id.Value);
+            if (bookFormViewModel == null)
             {
                 return NotFound();
             }
-            
-            ViewBag.CategoryList = await _bookService.GetCategorySelectListAsync(book.CategoryId);
-            return View(book);
+            return View(bookFormViewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Author,CategoryId,CreatedAt")] Book book)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Author,CategoryId,CreatedAt")] BookFormViewModel bookFormViewModel)
         {
-            if (id != book.Id)
+            if (id != bookFormViewModel.Id)
             {
                 return NotFound();
             }
-            ModelState.Remove("Reviews");
-            ModelState.Remove("Category");
-            ModelState.Remove("UserBooks");
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _bookService.UpdateBookAsync(book);
+                    await _bookService.UpdateBookAsync(bookFormViewModel);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await _bookService.BookExistsAsync(book.Id))
+                    if (!await _bookService.BookExistsAsync(bookFormViewModel.Id))
                     {
                         return NotFound();
                     }
@@ -111,8 +103,8 @@ namespace WebAppActions.Controllers
                 return RedirectToAction(nameof(Index));
             }
             
-            ViewBag.CategoryList = await _bookService.GetCategorySelectListAsync(book.CategoryId);
-            return View(book);
+            bookFormViewModel.CategoryList = await _bookService.GetCategorySelectListAsync(bookFormViewModel.CategoryId);
+            return View(bookFormViewModel);
         }
 
         public async Task<IActionResult> Delete(Guid? id)
@@ -122,13 +114,13 @@ namespace WebAppActions.Controllers
                 return NotFound();
             }
 
-            var book = await _bookService.GetBookWithDetailsAsync(id.Value);
-            if (book == null)
+            var bookViewModel = await _bookService.GetBookDetailsAsync(id.Value);
+            if (bookViewModel == null)
             {
                 return NotFound();
             }
 
-            return View(book);
+            return View(bookViewModel);
         }
 
         [HttpPost, ActionName("Delete")]
