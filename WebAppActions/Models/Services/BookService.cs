@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
@@ -11,64 +12,18 @@ namespace WebAppActions.Models.Services
     public class BookService : IBookService
     {
         private readonly IBookRepository _repository;
+        private readonly IMapper _mapper;
 
-        public BookService(IBookRepository repository)
+        public BookService(IBookRepository repository, IMapper mapper)
         {
             _repository = repository;
-        }
-
-        private BookViewModel MapBookToViewModel(Book book)
-        {
-            if (book == null) return null;
-            return new BookViewModel
-            {
-                Id = book.Id,
-                Title = book.Title,
-                Author = book.Author,
-                CategoryName = book.Category?.Name,
-                CreatedAt = book.CreatedAt
-            };
-        }
-
-        private BookFormViewModel MapBookToFormViewModel(Book book)
-        {
-            if (book == null) return null;
-            return new BookFormViewModel
-            {
-                Id = book.Id,
-                Title = book.Title,
-                Author = book.Author,
-                CategoryId = book.CategoryId,
-                CreatedAt = book.CreatedAt
-            };
-        }
-
-        private BookDetailsViewModel MapBookToDetailsViewModel(Book book)
-        {
-            if (book == null) return null;
-            return new BookDetailsViewModel
-            {
-                Id = book.Id,
-                Title = book.Title,
-                Author = book.Author,
-                CategoryName = book.Category?.Name,
-                CreatedAt = book.CreatedAt,
-                Owners = book.UserBooks?.Select(ub => new BookOwnerViewModel { Username = ub.User?.Username }).ToList() ?? new List<BookOwnerViewModel>(),
-                Reviews = book.Reviews?.Select(r => new ReviewViewModel { Rating = r.Rating, Comment = r.Comment, CreatedAt = r.CreatedAt }).ToList() ?? new List<ReviewViewModel>()
-            };
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<BookViewModel>> GetAllBooksAsync()
         {
             var books = await _repository.GetAllBooksAsync();
-            return books.Select(b => new BookViewModel 
-            {
-                Id = b.Id,
-                Title = b.Title,
-                Author = b.Author,
-                CategoryName = b.Category?.Name,
-                CreatedAt = b.CreatedAt
-            }).ToList();
+            return _mapper.Map<IEnumerable<BookViewModel>>(books);
         }
 
         public async Task<BookFormViewModel> GetBookForEditAsync(Guid id)
@@ -76,7 +31,7 @@ namespace WebAppActions.Models.Services
             var book = await _repository.GetBookByIdAsync(id);
             if (book == null) return null;
 
-            var viewModel = MapBookToFormViewModel(book);
+            var viewModel = _mapper.Map<BookFormViewModel>(book);
             viewModel.CategoryList = await GetCategorySelectListAsync(book.CategoryId);
             return viewModel;
         }
@@ -84,7 +39,7 @@ namespace WebAppActions.Models.Services
         public async Task<BookDetailsViewModel> GetBookDetailsAsync(Guid id)
         {
             var book = await _repository.GetBookWithDetailsAsync(id);
-            return MapBookToDetailsViewModel(book);
+            return _mapper.Map<BookDetailsViewModel>(book);
         }
 
         public async Task<SelectList> GetCategorySelectListAsync(Guid? selectedId = null)
@@ -94,17 +49,12 @@ namespace WebAppActions.Models.Services
 
         public async Task<BookViewModel> CreateBookAsync(BookFormViewModel bookFormViewModel)
         {
-            var book = new Book
-            {
-                Id = Guid.NewGuid(),
-                Title = bookFormViewModel.Title,
-                Author = bookFormViewModel.Author,
-                CategoryId = bookFormViewModel.CategoryId,
-                CreatedAt = DateTime.UtcNow
-            };
+            var book = _mapper.Map<Book>(bookFormViewModel);
+            book.Id = Guid.NewGuid();
+            book.CreatedAt = System.DateTime.UtcNow;
 
             await _repository.CreateBookAsync(book);
-            return MapBookToViewModel(book);
+            return _mapper.Map<BookViewModel>(book);
         }
 
         public async Task UpdateBookAsync(BookFormViewModel bookFormViewModel)
@@ -112,10 +62,7 @@ namespace WebAppActions.Models.Services
             var book = await _repository.GetBookByIdAsync(bookFormViewModel.Id);
             if (book != null)
             {
-                book.Title = bookFormViewModel.Title;
-                book.Author = bookFormViewModel.Author;
-                book.CategoryId = bookFormViewModel.CategoryId;
-
+                _mapper.Map(bookFormViewModel, book);
                 await _repository.UpdateBookAsync(book);
             }
         }
