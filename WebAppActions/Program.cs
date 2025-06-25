@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using WebAppActions.Models;
 using WebAppActions.Models.Repositories;
 using WebAppActions.Models.Services;
+using AutoMapper;
 
 namespace WebAppActions
 {
@@ -15,8 +16,10 @@ namespace WebAppActions
             builder.Services.AddTransient<IBookRepository, BookRepository>();
             builder.Services.AddTransient<IBookService, BookService>();
 
+            builder.Services.AddAutoMapper(typeof(Program));
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
+                options.UseLazyLoadingProxies().UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
