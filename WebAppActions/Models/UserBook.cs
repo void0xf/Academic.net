@@ -6,7 +6,7 @@ namespace WebAppActions.Models
     public class UserBook
     {
         [ForeignKey("User")]
-        public Guid UserId { get; set; }
+        public string UserId { get; set; }
         
         [ForeignKey("Book")]
         public Guid BookId { get; set; }
