@@ -19,7 +19,7 @@ namespace WebAppActions.Models
         public Guid BookId { get; set; }
         
         [ForeignKey("User")]
-        public Guid UserId { get; set; }
+        public string UserId { get; set; }
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
