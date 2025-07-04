@@ -19,7 +19,7 @@ namespace WebAppActions.Models.Mapping
 
             CreateMap<Review, ReviewViewModel>();
             CreateMap<UserBook, BookOwnerViewModel>()
-                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username));
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.UserName));
         }
     }
 } 
