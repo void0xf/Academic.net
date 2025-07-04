@@ -3,6 +3,7 @@ using WebAppActions.Models;
 using WebAppActions.Models.Repositories;
 using WebAppActions.Models.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebAppActions
 {
@@ -22,6 +23,10 @@ namespace WebAppActions
                 options.UseLazyLoadingProxies().UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")));
 
+                    
+            builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment())
@@ -35,11 +40,15 @@ namespace WebAppActions
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+            
+            app.MapRazorPages();
 
             app.Run();
         }
